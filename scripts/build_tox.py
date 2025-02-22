@@ -1,5 +1,6 @@
 import subprocess
 import os
+import shutil
 
 import gitVersion
 import build_settings
@@ -44,6 +45,10 @@ def main():
     subprocess.call([td_version, project_file])
 
     read_td_log.write_log_to_cloud(build_settings.log_file)
+
+    print("--> Zipping package")
+    shutil.make_archive(
+        f"{build_settings.dest_dir}/package", 'zip', build_settings.latest_dir)
 
     # cleanup environment variable keys
     env_var_utils.clear_env_vars(build_settings=build_settings)
