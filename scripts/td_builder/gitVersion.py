@@ -1,45 +1,66 @@
 import subprocess
 
 
-# NOTE define any supporting functions
-def GetVersioningInfo():
-    # grab git information...
-    # print("-> Version info")
-    git_branch_process = subprocess.run(
-        "git rev-parse --abbrev-ref HEAD", shell=True, capture_output=True)
-    branch = str(git_branch_process.stdout, 'utf-8').strip()
-    git_tag_process = subprocess.run(
-        "git describe --tags", shell=True, capture_output=True)
-    last_full_tag = str(git_tag_process.stdout, 'utf-8').strip()
-    print(f"-> last full tag {last_full_tag}")
+class distInfo:
 
-    tag_parts = last_full_tag.split('-')
-    major_minor = tag_parts[0]
-    major = major_minor.split('.')[0][1:]
-    minor = major_minor.split('.')[1]
+    def __init__(self):
+        self.commit: str
+        self.semver: str
+        self.major: str
+        self.minor: str
+        self.patch: str
+        self.branch: str
 
-    num_commits = "0"
-    current_commit_hash = None
-    if len(tag_parts) > 2:
-        num_commits = tag_parts[1]
-        current_commit_hash = tag_parts[2][1:]
+        self.GetVersioningInfo()
 
-    semver = major_minor+"."+num_commits
+    def GetVersioningInfo(self) -> None:
+        # grab git information...
+        git_branch_process = subprocess.run(
+            "git rev-parse --abbrev-ref HEAD", shell=True, capture_output=True)
+        branch = str(git_branch_process.stdout, 'utf-8').strip()
+        # replace any / characters from branch
+        branch = branch.replace("/", "-")
+        git_tag_process = subprocess.run(
+            "git describe --tags", shell=True, capture_output=True)
+        last_full_tag = str(git_tag_process.stdout, 'utf-8').strip()
 
-    if branch != "main":
-        if current_commit_hash is not None:
-            semver = semver + "+"+branch+"-"+current_commit_hash
-        else:
-            semver = semver + "+"+branch
+        tag_parts = last_full_tag.split('-')
+        major_minor = tag_parts[0]
+        major = major_minor.split('.')[0][1:]
+        minor = major_minor.split('.')[1]
 
-    dist_info = {
-        "commit": current_commit_hash,
-        "semver": semver,
-        "major_minor": major_minor,
-        "major": major,
-        "minor": minor,
-        "major_minor": major_minor,
-        "patch": num_commits,
-        "branch": branch
-    }
-    return dist_info
+        num_commits = "0"
+
+        current_commit_hash = None
+
+        if len(major_minor.split('.')) > 2:
+            num_commits = major_minor.split('.')[2]
+
+        semver = f"{major_minor}.{num_commits}"
+
+        if branch != "main":
+            if current_commit_hash is not None:
+                semver = f"{semver}+{branch}-{current_commit_hash}"
+
+            else:
+                semver = f"{semver}+{branch}"
+
+        self.commit = current_commit_hash
+        self.semver = semver
+        self.major = major
+        self.minor = minor
+        self.patch = num_commits
+        self.branch = branch
+
+    @property
+    def asDict(self) -> dict:
+        info_dict = {
+            "commit": self.commit,
+            "semver": self.semver,
+            "major": self.major,
+            "minor": self.minor,
+            "patch": self.patch,
+            "branch": self.branch
+        }
+
+        return info_dict
