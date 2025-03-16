@@ -8,9 +8,10 @@ def _set_env_var(key: str, value: str) -> None:
 
 def set_env_vars(build_settings: dict, dist_info: dict):
     print(f"-> Setting Environment Variables")
-    for each_key, each_val in build_settings.env_vars.items():
+    for each_key, each_val in build_settings.items():
         _set_env_var(each_key, each_val)
-    _set_env_var("SM_TOXVERSION", dist_info.get('major_minor', 'dev'))
+    semver = f"{dist_info.get('major', 'dev')}.{dist_info.get('minor', 'dev')}.{dist_info.get('patch', 'dev')}"
+    _set_env_var("SM_TOXVERSION", semver)
 
 
 def _remove_env_var(key: str) -> None:
@@ -20,6 +21,6 @@ def _remove_env_var(key: str) -> None:
 
 def clear_env_vars(build_settings: dict):
     print(f"-> Cleaning up Environment Variables")
-    for each_key in build_settings.env_vars.keys():
+    for each_key in build_settings.keys():
         _remove_env_var(each_key)
     _remove_env_var("SM_TOXVERSION")
