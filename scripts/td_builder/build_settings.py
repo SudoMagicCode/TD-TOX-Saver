@@ -5,6 +5,7 @@ class settings:
     REQUIRED_KEYS: list = ["TD_VERSION", "PROJECT_FILE", "REPO", "COMP_NAME"]
 
     def __init__(self):
+        self.build = "TRUE"
         self.project_file: str
         self.td_version: str
         self.log_file: str
@@ -32,7 +33,7 @@ class settings:
     def env_vars(self) -> dict:
         # build required keys
         env_vars = {
-            "SM_BUILD": "TRUE",
+            "SM_BUILD": self.build,
             "SM_PRIVACY": "FALSE",
             "SM_SAVE_PATH": f"../{self.dest_dir}",
             "SM_COMP_NAME": self.project_name,
