@@ -2,16 +2,17 @@ import json
 
 
 class settings:
-    REQUIRED_KEYS: list = ["TD_VERSION", "PROJECT_FILE", "REPO", "COMP_NAME"]
+    REQUIRED_KEYS: list = ["BUILD", "TD_VERSION",
+                           "PROJECT_FILE", "REPO", "COMP_NAME"]
 
     def __init__(self):
-        self.build = "TRUE"
         self.project_file: str
         self.td_version: str
         self.log_file: str
-        self._project_name: str = "TBD"
         self.privacy: str
         self.repo: str
+        self._build: str = "TRUE"
+        self._project_name: str = "TBD"
         self.release_dir: str = 'release'
         self.package_dir: str = f"{self.release_dir}/package"
         self.log_file: str = f"{self.package_dir}/log.txt"
@@ -28,6 +29,10 @@ class settings:
     @property
     def project_name(self) -> str:
         return self._project_name
+
+    @property
+    def build(self) -> str:
+        return self._build
 
     @property
     def env_vars(self) -> dict:
@@ -57,8 +62,9 @@ class settings:
 
                 if set(settings.REQUIRED_KEYS) <= data.keys():
                     print('-> all required keys accounted for')
-                    self.project_file = data.get("PROJECT_FILE")
+                    self._build = data.get("BUILD")
                     self.td_version = data.get("TD_VERSION")
+                    self.project_file = data.get("PROJECT_FILE")
                     self.repo = data.get("REPO")
                     self._project_name = data.get("COMP_NAME")
 
