@@ -83,7 +83,7 @@ Comments are a super helpful addition to TouchDesigner networks, but it can be h
 
 Colors associated with these parameters will then be used to set the color of the comment in your network.
 
-![base save and pars](assets/comment-colors.png)
+![base save and pars](assets/comment-colors.PNG)
 
 ## Short Cuts
 
@@ -95,7 +95,7 @@ In addition to saving a single file, you can also see all the components that yo
 
 ## All TOX Components - floating window
 
-![create-a-dir](assets/all-tox-comps-window.png)
+![create-a-dir](assets/all-tox-comps-window.PNG)
 
 It's not always easy to remember which `COMPs` have been externalized, or to get to them quickly. The `ctrl+shift+w` hot key opens a floating window that can help you manage your external TOX files. This floating window provides a quick view of a number of different attributes for your external files. Here you can see the name, version, and last saved date for your `TOX`. There are also four quick action buttons you might use.
 
@@ -122,7 +122,7 @@ When you're in any COMP in TouchDesigner use the hot-key `ctrl + w`
 ![create-a-dir](assets/create-project-dir.PNG)
 
 2. Open TouchDesigner and save your `.TOE` file in your new directory **this is an important step** - saving your project makes sure that the member `project.folder` correct points to your `.TOE` file.  
-![create-a-project](https://github.com/raganmd/touchdesigner-save-external/blob/master/assets/create-project-toe.PNG?raw=true)
+![create-a-project](https://raw.githubusercontent.com/raganmd/touchdesigner-save-external/refs/heads/main/assets/create-project-toe.PNG)
 
 3. Drop the `base_save.tox` from `touchdesigner-save-external\release` into your network - I'd recommend doing this at the root of your project, or in a place in your project specifically designed to hold other tools. I like to create a base called tools where I keep all the things that I use for development, or that any machine might need (meaning when you're thinking on a single `.TOE` file that's configured based on a machine's role)  
 ![drag-into-network](assets/drag-into-network.gif)
