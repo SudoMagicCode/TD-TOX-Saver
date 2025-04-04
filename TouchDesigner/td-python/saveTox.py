@@ -12,13 +12,15 @@ import saveOp
 import saveUtils
 import listerFuncs
 
+# derivative modules
+
 
 class ExternalFiles:
     """
-        The ExternalFiles class is used to handle working with both 
-        externalizing files, as well as ingesting files that were previously 
-        externalized. This helps to minimize the amount of manual work that 
-        might need to otherwise be use for handling external files. 
+        The ExternalFiles class is used to handle working with both
+        externalizing files, as well as ingesting files that were previously
+        externalized. This helps to minimize the amount of manual work that
+        might need to otherwise be use for handling external files.
     """
     FLASH_DURATION = 14
     UNLOCK_TAGS = [
@@ -26,7 +28,7 @@ class ExternalFiles:
     ]
 
     def __init__(self, my_op: callable) -> None:
-        """Stands in place of an execute dat - ensures all elements start-up 
+        """Stands in place of an execute dat - ensures all elements start-up
         correctly
 
         Notes
@@ -39,7 +41,7 @@ class ExternalFiles:
 
         Returns
         ---------
-        none		
+        none
         """
 
         self.my_op = my_op
@@ -49,6 +51,7 @@ class ExternalFiles:
                               0.5450000166893005,
                               0.5450000166893005)
         self.Ext_ops_DAT = my_op.op('script_external_ops')
+        self.popDialog = my_op.op('popDialog')
 
         self._ops_manager = saveOp.SaveOpManager(self.Ext_ops_DAT)
 
@@ -173,13 +176,13 @@ class ExternalFiles:
         Args
         ---------
         current_loc (str):
-        > the operator that's related to the currently focused 
+        > the operator that's related to the currently focused
         > pane object. This is required to ensure that we correctly
         > grab the appropriate COMP and check to see if needs to be saved
 
         Returns
         ---------
-        none		
+        none
         """
         current_loc = self.get_current_location
 
@@ -187,14 +190,11 @@ class ExternalFiles:
             "TouchDesigner").get("external_op").get("color")
         msg_box_title = "TOX Save"
         msg_box_msg = "Replacing External\n\nYou are about to overwrite an external TOX"
-        msg_box_buttons = ["Cancel", "Continue"]
+        msg_box_buttons = ["Cancel", "Save"]
 
         sav_msg_box_title = "Externalize Tox"
-        sav_msg_box_msg = "This TOX is not yet externalized\n\nWould you like to externalize this TOX?"
-        sav_msg_box_buttons = ["No", "Yes"]
-
-        save_msg_buttons_parent_too = [
-            "No", "This COMP Only", "This COMP and the Parent"]
+        sav_msg_box_msg = "This TOX is not yet externalized.\n\nWould you like to externalize this TOX?\n\nDir - save TOX with a directory\nSolo - save only TOX"
+        sav_msg_box_buttons = ["Cancel", "Dir", "Solo"]
 
         # check if location is the root of the project
         if current_loc == '/':
@@ -206,18 +206,28 @@ class ExternalFiles:
 
             # check if external
             if current_loc.par.externaltox != '':
-                confirmation = ui.messageBox(
-                    msg_box_title, msg_box_msg,
-                    buttons=msg_box_buttons)
 
-                if confirmation:
+                def dialog_choice(info):
+                    choice = info.get('buttonNum')
+                    current_loc = info.get('details').get('current_loc')
 
-                    # save external file
-                    self.Save_over_tox(current_loc)
+                    match choice:
 
-                else:
-                    # if the user presses "cancel" we pass
-                    pass
+                        case 2:
+                            self.Save_over_tox(current_loc)
+                        case 1:
+                            pass
+                        case _:
+                            pass
+
+                self.popDialog.Open(
+                    title=msg_box_title,
+                    text=msg_box_msg,
+                    buttons=msg_box_buttons,
+                    escButton=1,
+                    details={'current_loc': current_loc},
+                    callback=dialog_choice,
+                    textEntry=False)
 
             # in this case we are not external, so let's ask if we want to
             # externalize the file
@@ -225,42 +235,61 @@ class ExternalFiles:
 
                 # check if the parent is externalized
                 if current_loc.parent().par.externaltox != '':
-                    save_ext = ui.messageBox(
-                        sav_msg_box_title,
-                        sav_msg_box_msg,
-                        buttons=save_msg_buttons_parent_too)
+                    def dialog_choice(info):
+                        choice = info.get('buttonNum')
+                        current_loc = info.get('details').get('current_loc')
 
-                    # save this comp only
-                    if save_ext == 1:
-                        self.Save_tox(current_loc)
+                        match choice:
+                            case 3:
+                                # save COMP
+                                self.Save_tox(current_loc, include_dir=False)
+                                # save parent() COMP
+                                self.Save_over_tox(current_loc.parent())
+                            case 2:
+                                # save COMP
+                                self.Save_tox(current_loc)
+                                # save parent() COMP
+                                self.Save_over_tox(current_loc.parent())
+                            case 1:
+                                pass
+                            case _:
+                                pass
 
-                    # save this comp and the parent
-                    elif save_ext == 2:
-                        self.Save_tox(current_loc)
-                        self.Logtotextport("save this tox")
-
-                        # save parent() COMP
-                        self.Save_over_tox(current_loc.parent())
-                        self.Logtotextport("Save the parent too!")
-
-                    # user selected 'No' or 'X' button
-                    else:
-                        pass
+                    self.popDialog.Open(
+                        title=sav_msg_box_title,
+                        text=sav_msg_box_msg,
+                        buttons=sav_msg_box_buttons,
+                        escButton=1,
+                        details={'current_loc': current_loc},
+                        callback=dialog_choice,
+                        textEntry=False)
 
                 # the parent is not external, so let's ask about externalizing
                 # the tox
                 else:
-                    save_ext = ui.messageBox(
-                        sav_msg_box_title,
-                        sav_msg_box_msg,
-                        buttons=sav_msg_box_buttons)
-                    
-                    if save_ext == 1:
-                        self.Save_tox(current_loc)
 
-                    else:
-                        # the user selected "No" or 'X' button
-                        pass
+                    def dialog_choice(info):
+                        choice = info.get('buttonNum')
+                        current_loc = info.get('details').get('current_loc')
+
+                        match choice:
+                            case 3:
+                                self.Save_tox(current_loc, include_dir=False)
+                            case 2:
+                                self.Save_tox(current_loc)
+                            case 1:
+                                pass
+                            case _:
+                                pass
+
+                    self.popDialog.Open(
+                        title=sav_msg_box_title,
+                        text=sav_msg_box_msg,
+                        buttons=sav_msg_box_buttons,
+                        details={'current_loc': current_loc},
+                        escButton=1,
+                        callback=dialog_choice,
+                        textEntry=False)
 
         return
 
@@ -278,69 +307,74 @@ class ExternalFiles:
         self._save_tox(current_loc)
         return
 
-    def Save_tox(self, current_loc):
+    def Save_tox(self, current_loc, include_dir: bool = True):
+        # get the external op color
         ext_color = self.Colors_map.get(
             "TouchDesigner").get("external_op").get("color")
 
         # ask user for a save location
         save_loc = ui.chooseFolder(title="TOX Location", start=project.folder)
 
-        # construct a relative path and relative loaction for our elements
+        # construct a relative path and relative location for our elements
         rel_path = tdu.collapsePath(save_loc)
 
-        # check to see if the location is at the root of the project folder structure
-        if rel_path == "$TOUCH":
-            rel_loc = '{new_tox}/{new_tox}.tox'.format(
-                new_tox=current_loc.name)
+        # build paths that include a directory
+        if include_dir:
+            # check to see if the location is at the root of the project folder structure
+            if rel_path == "$TOUCH":
+                # build a save location that includes a directory with the same name as the COMP
+                rel_loc = f'{current_loc.name}/{current_loc.name}.tox'
 
-        # save path is not in the root of the project
-        else:
-            rel_loc = '{new_module}/{new_tox}/{new_tox}.tox'.format(
-                new_module=rel_path, new_tox=current_loc.name)
-
-        # create path and directory in the OS
-        new_path = '{selected_path}/{new_module}'.format(
-            selected_path=save_loc, new_module=current_loc.name)
-
-        try:
-            os.mkdir(new_path)
-            valid_external_path = True
-        except:
-            self.alert_failed_dir_creation(
-                new_path=new_path, current_loc=current_loc)
-            valid_external_path = False
-
-        if valid_external_path:
-            # format our tox path
-            tox_path = '{dir_path}/{tox}.tox'.format(
-                dir_path=new_path, tox=current_loc.name)
-
-            # setup our module correctly
-            current_loc.par.externaltox = '' if current_loc.par['Sudotool'] else rel_loc
-            current_loc.par.savebackup = False
-
-            # set color for COMP
-            current_loc.color = self.op_none_color if current_loc.par['Sudotool'] else (
-                ext_color[0], ext_color[1], ext_color[2])
-
-            # setup about page - allow user to supress about page at creation
-            if self.my_op.par.Includeaboutpage:
-                self.custom_page_setup(current_loc)
+            # save path is not in the root of the project
             else:
-                pass
+                # build a save location that includes a directory with the same name as the COMP
+                rel_loc = f'{rel_path}/{current_loc.name}/{current_loc.name}.tox'
 
-            # private save method
-            self._save_tox(current_loc)
+            # create path and directory in the OS
+            new_path = f'{save_loc}/{current_loc.name}'
 
-            # track new SaveOp
-            self._ops_manager.Check_external_ops()
+        # build paths that do not include a directory
+        else:
+            # check to see if the location is at the root of the project folder structure
+            if rel_path == "$TOUCH":
+                # build a save location that includes a directory with the same name as the COMP
+                rel_loc = f'{current_loc.name}.tox'
 
+            # save path is not in the root of the project
+            else:
+                # build a save location that includes a directory with the same name as the COMP
+                rel_loc = f'{rel_path}/{current_loc.name}.tox'
+
+            # create path and directory in the OS
+            new_path = f'{save_loc}/{current_loc.name}'
+
+        # format our tox path
+        tox_path = f'{new_path}/{current_loc.name}.tox'
+
+        # setup our module correctly
+        current_loc.par.enableexternaltox = True
+        current_loc.par.externaltox = '' if current_loc.par['Sudotool'] else rel_loc
+        current_loc.par.savebackup = False
+
+        # set color for COMP
+        current_loc.color = self.op_none_color if current_loc.par['Sudotool'] else (
+            ext_color[0], ext_color[1], ext_color[2])
+
+        # setup about page - allow user to supress about page at creation
+        if self.my_op.par.Includeaboutpage:
+            self.custom_page_setup(current_loc)
         else:
             pass
 
+        # private save method
+        self._save_tox(current_loc)
+
+        # track new SaveOp
+        self._ops_manager.Check_external_ops()
+
         return
 
-    def _save_tox(self, current_loc: str) -> None:
+    def _save_tox(self, current_loc) -> None:
         ext_color = self.Colors_map.get(
             "TouchDesigner").get("external_op").get("color")
         external_path = current_loc.par.externaltox
@@ -349,7 +383,7 @@ class ExternalFiles:
         self.preToxSave(current_loc)
 
         # save tox
-        current_loc.save(external_path)
+        current_loc.save(external_path, createFolders=True)
 
         # Run post-save event
         self.postToxSave(current_loc)
