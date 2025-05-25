@@ -13,6 +13,7 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
+          submodules: true 
 
       - name: Start Python Runner
         run: python scripts/build_tox.py
