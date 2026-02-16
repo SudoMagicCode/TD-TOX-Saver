@@ -1,0 +1,65 @@
+name: Create TOX Release
+
+on:
+  push:
+    branches:
+      - main
+
+
+jobs:
+  Build_tox:
+    runs-on: [self-hosted, Windows, TouchDesigner]
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          submodules: true 
+
+      - name: SudoMagic TD Package Builder
+        uses: SudoMagicCode/action-build-td-tox-package@v0.0.4
+        with:
+          build_settings: ./buildSettings.json
+
+      - name: Generate Hybrid Version
+        id: semver
+        run: |
+          # This pattern matches v, digits, a literal dot, and digits. 
+          # It effectively blocks v1.0.1 because the * after the second number 
+          # would usually allow another dot, but we want to anchor strictly.
+          $BASE_TAG = git describe --tags --abbrev=0 --match "v[0-9]*.[0-9]*" --exclude "v*.*.*" 2>$null          
+          
+          if ($LASTEXITCODE -ne 0) { 
+            Write-Host "No base tag found, defaulting to v0.0"
+            $BASE_TAG = "v0.0" 
+          }
+
+          # 2. Count commits since that base tag.
+          # If the current commit is the tag itself, COUNT will be 0.
+          if ($BASE_TAG -eq "v0.0") {
+            $COUNT = git rev-list --count HEAD
+          } else {
+            $COUNT = git rev-list --count "$($BASE_TAG)..HEAD"
+          }
+
+          # 3. Construct the hybrid VERSION (vX.Y.Z)
+          $VERSION = "$BASE_TAG.$COUNT"
+          
+          Write-Host "Base Tag: $BASE_TAG"
+          Write-Host "Commits since base: $COUNT"
+          Write-Host "Final Release Version: $VERSION"
+          
+          echo "VERSION=$VERSION" >> $env:GITHUB_OUTPUT
+          
+      - name: Create Github Release
+        uses:  softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.semver.outputs.VERSION }}
+          name: Release ${{ steps.semver.outputs.VERSION }}
+          # Generates "What's Changed" section automatically from PRs/commits
+          generate_release_notes: true
+          # Set to true if you want it to stay hidden until you review it
+          draft: false 
+          prerelease: false
+          files: ./release/package.zip
