@@ -2,6 +2,7 @@
     "BUILD": "TRUE",
     "TD_VERSION": "2025.32280",
     "PROJECT_FILE": "./TouchDesigner/project.toe",
-    "REPO": "https://github.com/SudoMagicCode/TD-TOX-Saver",
-    "COMP_NAME": "base_save"
+    "COMP_NAME": "base_save",
+    "BUILD_CONTENTS": "packageZip",
+    "USE_TDM": true
 }
