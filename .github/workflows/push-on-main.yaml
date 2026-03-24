@@ -11,7 +11,7 @@ jobs:
     runs-on: [self-hosted, Windows, TouchDesigner]
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           fetch-tags: true
@@ -62,4 +62,4 @@ jobs:
           # Set to true if you want it to stay hidden until you review it
           draft: false 
           prerelease: false
-          files: ./release/package.zip
+          files: ./artifacts/package.zip

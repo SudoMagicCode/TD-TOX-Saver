@@ -1,4 +1,8 @@
 name: TD-TOX-Saver
-tdVersion: 2025.32280.Project
+tdVersion: 2025.32460.Project
 tdPackages:
+    - package: github.com/SudoMagicCode/td-packager-comp
+      releaseTag: v0.2.27
+    - package: github.com/SudoMagicCode/td-comp-icon
+      releaseTag: v1.2.8
 pythonRequirements: []
