@@ -6,164 +6,7 @@ Contact   | contact@sudomagic.com
 
 # td python mods
 import saveUtils
-
-
-class SaveOpManager:
-    """SaveOpManager
-    """
-
-    def __init__(self, ext_ops_DAT) -> None:
-        """TODO: complete doc strings
-
-        Args
-        ---------------
-        self (`callable`)
-        > Class instance
-
-        Returns
-        ---------------
-        None      
-        """
-        self.Ext_ops_DAT = ext_ops_DAT
-        self.External_ops: list = []
-        self._build_op_list()
-
-    def add_save_op(self, td_operator: callable) -> None:
-        """TODO: complete doc strings
-
-        Args
-        ---------------
-        self (`callable`)
-        > Class instance
-
-        Returns
-        ---------------
-        None      
-        """
-        new_save_op: SaveOp = SaveOp(td_operator)
-        self.External_ops.append(new_save_op)
-        pass
-
-    def check_hash_status(self) -> None:
-        """TODO: complete doc strings
-
-        Args
-        ---------------
-        self (`callable`)
-        > Class instance
-
-        Returns
-        ---------------
-        None      
-        """
-        pass
-
-    @property
-    def external_ops(self) -> None:
-        """Returns a list of all external comps
-        """
-        children = root.findChildren(type=COMP)
-        external_ops = [
-            eachChild for eachChild in children if eachChild.par.externaltox != '']
-        return external_ops
-
-    @property
-    def dirty_ops(self) -> None:
-        """TODO: complete doc strings
-
-        Args
-        ---------------
-        self (`callable`)
-        > Class instance
-
-        Returns
-        ---------------
-        None      
-        """
-
-        dirty_op_list = [
-            each_ext_op for each_ext_op in self.External_ops if each_ext_op.is_dirty]
-        return dirty_op_list
-
-    def _build_op_list(self) -> None:
-        """TODO: complete doc strings
-
-        Args
-        ---------------
-        self (`callable`)
-        > Class instance
-
-        Returns
-        ---------------
-        None      
-        """
-
-        externals = self.external_ops
-        external_list = []
-
-        for each in externals:
-            new_save_op: SaveOp = SaveOp(each)
-            self.External_ops.append(new_save_op)
-
-    def Check_external_ops(self) -> None:
-        all_externals = self.external_ops
-        tracked_ids = [each.id for each in self.External_ops]
-        for each_external in all_externals:
-            if each_external.id in tracked_ids:
-                pass
-            else:
-                self.add_save_op(each_external)
-                print(f"adding new tracked external op {each_external}")
-
-        # force cook DAT with list of all ops
-        self.Ext_ops_DAT.cook(force=True)
-
-    def Dirty_check(self) -> None:
-        self.Check_external_ops()
-        for each_index, each_op in enumerate(self.External_ops):
-            if each_op.td_op.valid:
-                each_op: SaveOp = each_op
-                each_op.dirty_check()
-            else:
-                self.External_ops.pop(each_index)
-
-    def Ignore_current_dirty_state(self, target_op_id: int) -> None:
-        target_op: SaveOp = self.get_save_op_by_id(target_op_id)
-        target_op.op_hash = saveUtils.gen_hash_from_op(target_op.td_op)
-        target_op.is_dirty = False
-
-    def get_save_op_by_id(self, op_id: int) -> callable:
-        op_by_id = None
-
-        for each_op in self.External_ops:
-            each_op: SaveOp = each_op
-            if each_op.id == op_id:
-                op_by_id = each_op
-                break
-
-        return each_op
-
-    def Update_save_op_by_path(self, path: str, value: bool):
-        """TODO: complete doc strings
-
-        Args
-        ---------------
-        self (`callable`)
-        > Class instance
-
-        Returns
-        ---------------
-        None      
-        """
-        # for each_save_op_index, each_save_op in enumerate(self.External_ops):
-        #     each_save_op: SaveOp = each_save_op
-        #     if each_save_op.td_op.path == path:
-        #         each_save_op.is_dirty = value
-        #         each_save_op.op_hash = saveUtils.gen_hash_from_op(op(path))
-        #         break
-        #     else:
-        #         pass
-        pass
+from datetime import datetime
 
 
 class SaveOp:
@@ -296,3 +139,195 @@ class SaveOp:
             return 'DevTool'
         else:
             return ''
+
+
+class SaveOpManager:
+    """SaveOpManager
+    """
+
+    def __init__(self, ext_ops_DAT: DAT) -> None:
+        """TODO: complete doc strings
+
+        Args
+        ---------------
+        self (`callable`)
+        > Class instance
+
+        Returns
+        ---------------
+        None      
+        """
+        self.Ext_ops_DAT = ext_ops_DAT
+        self.External_ops: list[SaveOp] = []
+        self._build_op_list()
+
+    def add_save_op(self, td_operator: OP) -> None:
+        """TODO: complete doc strings
+
+        Args
+        ---------------
+        self (`callable`)
+        > Class instance
+
+        Returns
+        ---------------
+        None      
+        """
+        new_save_op: SaveOp = SaveOp(td_operator)
+        self.External_ops.append(new_save_op)
+        pass
+
+    def check_hash_status(self) -> None:
+        """TODO: complete doc strings
+
+        Args
+        ---------------
+        self (`callable`)
+        > Class instance
+
+        Returns
+        ---------------
+        None      
+        """
+        pass
+
+    @property
+    def external_ops(self) -> None:
+        """Returns a list of all external comps
+        """
+        children = root.findChildren(type=COMP)
+        external_ops = [
+            eachChild for eachChild in children if eachChild.par.externaltox != '']
+        return external_ops
+
+    @property
+    def dirty_ops(self) -> None:
+        """TODO: complete doc strings
+
+        Args
+        ---------------
+        self (`callable`)
+        > Class instance
+
+        Returns
+        ---------------
+        None      
+        """
+
+        dirty_op_list = [
+            each_ext_op for each_ext_op in self.External_ops if each_ext_op.is_dirty]
+        return dirty_op_list
+
+    def _build_op_list(self) -> None:
+        """TODO: complete doc strings
+
+        Args
+        ---------------
+        self (`callable`)
+        > Class instance
+
+        Returns
+        ---------------
+        None      
+        """
+
+        externals = self.external_ops
+        external_list = []
+
+        for each in externals:
+            new_save_op: SaveOp = SaveOp(each)
+            self.External_ops.append(new_save_op)
+
+    def Check_external_ops(self) -> None:
+        all_externals = self.external_ops
+        tracked_ids = [each.id for each in self.External_ops]
+        for each_external in all_externals:
+            if each_external.id in tracked_ids:
+                pass
+            else:
+                self.add_save_op(each_external)
+                print(f"adding new tracked external op {each_external}")
+
+        # force cook DAT with list of all ops
+        self.Ext_ops_DAT.cook(force=True)
+
+    def Dirty_check(self) -> None:
+        self.Check_external_ops()
+        for each_index, each_op in enumerate(self.External_ops):
+            if each_op.td_op.valid:
+                each_op: SaveOp = each_op
+                each_op.dirty_check()
+            else:
+                self.External_ops.pop(each_index)
+
+    def Ignore_current_dirty_state(self, target_op_id: int) -> None:
+        target_op: SaveOp = self.get_save_op_by_id(target_op_id)
+        target_op.op_hash = saveUtils.gen_hash_from_op(target_op.td_op)
+        target_op.is_dirty = False
+
+    def get_save_op_by_id(self, op_id: int) -> callable:
+        op_by_id = None
+
+        for each_op in self.External_ops:
+            each_op: SaveOp = each_op
+            if each_op.id == op_id:
+                op_by_id = each_op
+                break
+
+        return each_op
+
+    def _truncate_date_time_str(self, datetimeStr: str) -> str:
+        # NOTE Gemini Generated
+        """
+        """
+        dt_obj = datetime.strptime(datetimeStr, "%Y-%m-%d %H:%M:%S.%f")
+        return dt_obj.strftime("%Y-%m-%d %H:%M")
+
+    def td_op_to_row(self, inputOp: SaveOp) -> list[str]:
+        """
+        """
+        td_row = [
+            inputOp.td_op.name,
+            inputOp.td_op.path,
+            inputOp.id,
+            inputOp.is_dirty,
+            inputOp.version,
+            self._truncate_date_time_str(inputOp.last_saved.eval()),
+            inputOp.tags
+        ]
+        return td_row
+
+    def External_ops_for_table(self) -> list[str]:
+        """
+        """
+        output_list = []
+        for each in self.External_ops:
+            print(type(each))
+            try:
+                output_list.append(self.td_op_to_row(each))
+            except Exception as e:
+                print(e)
+                output_list.append(['ROW ERROR - Refresh Save EXT'])
+        return output_list
+
+    def Update_save_op_by_path(self, path: str, value: bool):
+        """TODO: complete doc strings
+
+        Args
+        ---------------
+        self (`callable`)
+        > Class instance
+
+        Returns
+        ---------------
+        None      
+        """
+        # for each_save_op_index, each_save_op in enumerate(self.External_ops):
+        #     each_save_op: SaveOp = each_save_op
+        #     if each_save_op.td_op.path == path:
+        #         each_save_op.is_dirty = value
+        #         each_save_op.op_hash = saveUtils.gen_hash_from_op(op(path))
+        #         break
+        #     else:
+        #         pass
+        pass

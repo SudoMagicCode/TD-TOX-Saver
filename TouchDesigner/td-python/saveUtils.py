@@ -6,6 +6,7 @@ Contact   | contact@sudomagic.com
 
 # pure python
 import hashlib
+from SpellStack import opBuilderUtils
 from datetime import datetime
 
 
@@ -205,3 +206,45 @@ def Reload_tox(comp):
     The intended use of this function is to reload TOX
     """
     comp.par.reinitnet.pulse()
+
+    def set_about_details(self, targetOp: OP, release: str):
+        """Update about details
+        """
+
+        opBuilderUtils.update_custom_str_par(
+            targetOp,
+            "Toxversion",
+            release,
+            "TOX Version",
+            newSection=True,
+            order=100)
+
+        opBuilderUtils.update_custom_str_par(
+            targetOp,
+            "Tdversion",
+            app.version,
+            "TD Version",
+            order=102)
+
+        opBuilderUtils.update_custom_str_par(
+            targetOp,
+            "Tdbuild",
+            app.build,
+            "TD Build",
+            order=103)
+
+        opBuilderUtils.update_custom_str_par(
+            targetOp,
+            "Lastsaved",
+            str(opBuilderUtils.datetime.now()),
+            "Last Saved",
+            order=104)
+
+        opBuilderUtils.update_custom_str_par(
+            targetOp,
+            "Osbuildenv",
+            app.osName,
+            "OS Build Env",
+            order=105)
+
+        self._log_release_event(msg='Updating about')

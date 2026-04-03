@@ -27,7 +27,7 @@ class ExternalFiles:
         "unlockOnSave"
     ]
 
-    def __init__(self, my_op: callable) -> None:
+    def __init__(self, my_op: OP) -> None:
         """Stands in place of an execute dat - ensures all elements start-up
         correctly
 
@@ -472,7 +472,7 @@ this TOX does not already exist.
                 tox_path)
             self.Logtotextport(log_msg)
 
-    def update_custom_str_par(self, targetOp, par, value, par_label="Temp"):
+    def update_custom_str_par(self, targetOp: OP, par: Par, value, par_label="Temp"):
         if targetOp.par[par] != None:
             targetOp.par[par] = value
         else:
@@ -481,7 +481,7 @@ this TOX does not already exist.
             targetOp.par[par] = value
             targetOp.par[par].readOnly = True
 
-    def update_version_pars(self, target_op: callable, new_version: str = '') -> None:
+    def update_version_pars(self, target_op: OP, new_version: str = '') -> None:
         """Updates semver of TOX
         """
 
@@ -564,7 +564,7 @@ this TOX does not already exist.
 
     def Logtotextport(self, logMsg):
         ui.status = f"{self._log_label} {logMsg}"
-        if parent().par.Logtotextport:
+        if self.my_op.par.Logtotextport:
             print(f"{self._log_label} {logMsg}")
         else:
             pass
