@@ -10,29 +10,28 @@ from datetime import datetime
 
 
 class SaveOp:
-    """SaveOpManager
-    """
+    """SaveOpManager"""
 
     def __init__(self, td_operator: callable) -> None:
         """Class Object Init
 
-            Notes
-            ---------
+        Notes
+        ---------
 
-            Args
-            ---------
-            self (`callable`)
-            > Class instance
+        Args
+        ---------
+        self (`callable`)
+        > Class instance
 
-            td_operator (`callable`)
-            > A TouchDesigner operator this save_op is built from
+        td_operator (`callable`)
+        > A TouchDesigner operator this save_op is built from
 
-            op_hash (`callable`)
-            > A has constructed from the state of the external op
+        op_hash (`callable`)
+        > A has constructed from the state of the external op
 
-            Returns
-            ---------
-            None
+        Returns
+        ---------
+        None
         """
         self._ext_op = td_operator
         self._is_dirty = tdu.Dependency(False)
@@ -49,7 +48,7 @@ class SaveOp:
 
         Returns
         ---------------
-        None      
+        None
         """
 
         old_hash = self._op_hash
@@ -89,7 +88,7 @@ class SaveOp:
         Returns
         ---------------
         is_dirty (`bool`)
-        > The dirty state as a boolean      
+        > The dirty state as a boolean
         """
         return self._is_dirty.val
 
@@ -109,20 +108,20 @@ class SaveOp:
 
         Returns
         ---------------
-        None      
+        None
         """
         self._is_dirty.val = state
 
     @property
     def last_saved(self) -> callable:
-        if self._ext_op.par['Lastsaved']:
+        if self._ext_op.par["Lastsaved"]:
             return self._ext_op.par.Lastsaved
         else:
             return None
 
     @property
     def version(self) -> callable:
-        if self._ext_op.par['Toxversion']:
+        if self._ext_op.par["Toxversion"]:
             return self._ext_op.par.Toxversion
         else:
             return None
@@ -133,17 +132,16 @@ class SaveOp:
 
     @property
     def tags(self) -> callable:
-        if 'submodule' in self._ext_op.tags:
-            return 'submodule'
-        elif 'devTool' in self._ext_op.tags:
-            return 'DevTool'
+        if "submodule" in self._ext_op.tags:
+            return "submodule"
+        elif "devTool" in self._ext_op.tags:
+            return "DevTool"
         else:
-            return ''
+            return ""
 
 
 class SaveOpManager:
-    """SaveOpManager
-    """
+    """SaveOpManager"""
 
     def __init__(self, ext_ops_DAT: DAT) -> None:
         """TODO: complete doc strings
@@ -155,7 +153,7 @@ class SaveOpManager:
 
         Returns
         ---------------
-        None      
+        None
         """
         self.Ext_ops_DAT = ext_ops_DAT
         self.External_ops: list[SaveOp] = []
@@ -171,7 +169,7 @@ class SaveOpManager:
 
         Returns
         ---------------
-        None      
+        None
         """
         new_save_op: SaveOp = SaveOp(td_operator)
         self.External_ops.append(new_save_op)
@@ -187,17 +185,17 @@ class SaveOpManager:
 
         Returns
         ---------------
-        None      
+        None
         """
         pass
 
     @property
     def external_ops(self) -> None:
-        """Returns a list of all external comps
-        """
+        """Returns a list of all external comps"""
         children = root.findChildren(type=COMP)
         external_ops = [
-            eachChild for eachChild in children if eachChild.par.externaltox != '']
+            eachChild for eachChild in children if eachChild.par.externaltox != ""
+        ]
         return external_ops
 
     @property
@@ -211,11 +209,12 @@ class SaveOpManager:
 
         Returns
         ---------------
-        None      
+        None
         """
 
         dirty_op_list = [
-            each_ext_op for each_ext_op in self.External_ops if each_ext_op.is_dirty]
+            each_ext_op for each_ext_op in self.External_ops if each_ext_op.is_dirty
+        ]
         return dirty_op_list
 
     def _build_op_list(self) -> None:
@@ -228,7 +227,7 @@ class SaveOpManager:
 
         Returns
         ---------------
-        None      
+        None
         """
 
         externals = self.external_ops
@@ -278,14 +277,16 @@ class SaveOpManager:
 
     def _truncate_date_time_str(self, datetimeStr: str) -> str:
         # NOTE Gemini Generated
-        """
-        """
-        dt_obj = datetime.strptime(datetimeStr, "%Y-%m-%d %H:%M:%S.%f")
+        """ """
+
+        try:
+            dt_obj = datetime.strptime(datetimeStr, "%Y-%m-%d %H:%M:%S.%f")
+        except ValueError:
+            dt_obj = datetime.strptime(datetimeStr, "%Y-%m-%d %H:%M:%S")
         return dt_obj.strftime("%Y-%m-%d %H:%M")
 
     def td_op_to_row(self, inputOp: SaveOp) -> list[str]:
-        """
-        """
+        """ """
         td_row = [
             inputOp.td_op.name,
             inputOp.td_op.path,
@@ -293,21 +294,20 @@ class SaveOpManager:
             inputOp.is_dirty,
             inputOp.version,
             self._truncate_date_time_str(inputOp.last_saved.eval()),
-            inputOp.tags
+            inputOp.tags,
         ]
         return td_row
 
     def External_ops_for_table(self) -> list[str]:
-        """
-        """
+        """ """
         output_list = []
         for each in self.External_ops:
-            print(type(each))
+
             try:
                 output_list.append(self.td_op_to_row(each))
             except Exception as e:
                 print(e)
-                output_list.append(['ROW ERROR - Refresh Save EXT'])
+                output_list.append(["ROW ERROR - Refresh Save EXT"])
         return output_list
 
     def Update_save_op_by_path(self, path: str, value: bool):
@@ -320,7 +320,7 @@ class SaveOpManager:
 
         Returns
         ---------------
-        None      
+        None
         """
         # for each_save_op_index, each_save_op in enumerate(self.External_ops):
         #     each_save_op: SaveOp = each_save_op
