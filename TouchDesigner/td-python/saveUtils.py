@@ -9,8 +9,7 @@ import hashlib
 from SpellStack import opBuilderUtils
 from datetime import datetime
 
-
-DEFAULT_WORKSHEET_COLOR = (0.1, 0.105, .12)
+DEFAULT_WORKSHEET_COLOR = (0.1, 0.105, 0.12)
 
 
 def gen_hash_from_op(td_operator: callable) -> callable:
@@ -24,7 +23,7 @@ def gen_hash_from_op(td_operator: callable) -> callable:
     Returns
     ---------------
     op_hash (`callable`)
-    > Hash generated from TouchDesigner operator's data    
+    > Hash generated from TouchDesigner operator's data
     """
 
     allPars = []
@@ -35,20 +34,20 @@ def gen_hash_from_op(td_operator: callable) -> callable:
     # generate a dict of elements that may have changed
     for each_child in all_children:
         child_dict = {}
-        child_dict['nodeX'] = each_child.nodeX
-        child_dict['nodeY'] = each_child.nodeY
-        child_dict['nodeWidth'] = each_child.nodeWidth
-        child_dict['nodeHeight'] = each_child.nodeHeight
-        child_dict['color'] = each_child.color
-        child_dict['path'] = each_child.path
-        child_dict['pars_dict'] = {}
+        child_dict["nodeX"] = each_child.nodeX
+        child_dict["nodeY"] = each_child.nodeY
+        child_dict["nodeWidth"] = each_child.nodeWidth
+        child_dict["nodeHeight"] = each_child.nodeHeight
+        child_dict["color"] = each_child.color
+        child_dict["path"] = each_child.path
+        child_dict["pars_dict"] = {}
 
         for each_par in each_child.pars():
             if each_par.mode != ParMode.EXPRESSION:
                 if each_par.page == "About":
                     pass
                 else:
-                    child_dict['pars_dict'][each_par.name] = each_par.val
+                    child_dict["pars_dict"][each_par.name] = each_par.val
                     allPars.append(child_dict)
 
     # generate a hash of changed elements
@@ -71,10 +70,14 @@ def find_all_dats() -> list:
 
     # reduce list to only ops with an external file
     for eachOp in only_file_ops:
-        if eachOp.par['file'] != '':
-            external_dats.append(eachOp)
-        else:
-            pass
+        try:
+            if eachOp.par["file"] != "":
+                external_dats.append(eachOp)
+            else:
+                pass
+        except Exception as e:
+            print(e)
+
     return external_dats
 
 
@@ -86,11 +89,11 @@ def find_all_comments() -> list:
 
 
 def find_external_ops():
-    """Returns a list of all external comps
-    """
+    """Returns a list of all external comps"""
     children = root.findChildren(type=COMP)
     external_ops = [
-        eachChild for eachChild in children if eachChild.par.externaltox != '']
+        eachChild for eachChild in children if eachChild.par.externaltox != ""
+    ]
     return external_ops
 
 
@@ -103,7 +106,7 @@ def get_non_external_children(target_op) -> list:
     # add ops that are not external to our list
     for each_immediate_child in immediate_children:
         if each_immediate_child.family == "COMP":
-            if each_immediate_child.par.externaltox.eval() != '':
+            if each_immediate_child.par.externaltox.eval() != "":
                 pass
             else:
                 non_ext_children.append(each_immediate_child)
@@ -125,8 +128,8 @@ def get_non_external_children(target_op) -> list:
 def ext_parent(target_op) -> callable:
     ext_parent = None
     parent_paths = []
-    parent_paths_parts = target_op.parent().path.split('/')
-    last_path = ''
+    parent_paths_parts = target_op.parent().path.split("/")
+    last_path = ""
 
     for each_index in parent_paths_parts[1:]:
         last_path = f"{last_path}/{each_index}"
@@ -135,7 +138,7 @@ def ext_parent(target_op) -> callable:
     parent_paths.reverse()
 
     for each_path in parent_paths:
-        if op(each_path).par.externaltox != '':
+        if op(each_path).par.externaltox != "":
             ext_parent = op(each_path)
             break
         else:
@@ -151,9 +154,9 @@ def current_save_time() -> str:
 
 
 def flash_bg(flash_color: tuple, duration: int) -> None:
-    """ Flashes the background of TouchDesigner
+    """Flashes the background of TouchDesigner
 
-    Used to flash the background of the TD network. 
+    Used to flash the background of the TD network.
 
     Notes
     ---------
@@ -172,10 +175,10 @@ def flash_bg(flash_color: tuple, duration: int) -> None:
 
     Returns
     ---------
-    none		
+    none
     """
 
-    ui.colors['worksheet.bg'] = flash_color
+    ui.colors["worksheet.bg"] = flash_color
     delay_script = "ui.colors['worksheet.bg'] = args[0]"
 
     # want to change the background color back
@@ -185,8 +188,7 @@ def flash_bg(flash_color: tuple, duration: int) -> None:
 
 
 def Open_network_location(network_location):
-    """ Moves network to save location
-    """
+    """Moves network to save location"""
     ui.panes.current.owner = network_location
     ui.panes.current.home()
 
@@ -208,43 +210,30 @@ def Reload_tox(comp):
     comp.par.reinitnet.pulse()
 
     def set_about_details(self, targetOp: OP, release: str):
-        """Update about details
-        """
+        """Update about details"""
 
         opBuilderUtils.update_custom_str_par(
-            targetOp,
-            "Toxversion",
-            release,
-            "TOX Version",
-            newSection=True,
-            order=100)
+            targetOp, "Toxversion", release, "TOX Version", newSection=True, order=100
+        )
 
         opBuilderUtils.update_custom_str_par(
-            targetOp,
-            "Tdversion",
-            app.version,
-            "TD Version",
-            order=102)
+            targetOp, "Tdversion", app.version, "TD Version", order=102
+        )
 
         opBuilderUtils.update_custom_str_par(
-            targetOp,
-            "Tdbuild",
-            app.build,
-            "TD Build",
-            order=103)
+            targetOp, "Tdbuild", app.build, "TD Build", order=103
+        )
 
         opBuilderUtils.update_custom_str_par(
             targetOp,
             "Lastsaved",
             str(opBuilderUtils.datetime.now()),
             "Last Saved",
-            order=104)
+            order=104,
+        )
 
         opBuilderUtils.update_custom_str_par(
-            targetOp,
-            "Osbuildenv",
-            app.osName,
-            "OS Build Env",
-            order=105)
+            targetOp, "Osbuildenv", app.osName, "OS Build Env", order=105
+        )
 
-        self._log_release_event(msg='Updating about')
+        self._log_release_event(msg="Updating about")
